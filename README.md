@@ -10,3 +10,4 @@
   * Use the cat for now
 * Make our own dude
 * Fix the screen size
+* Make the terminal stop ✅
