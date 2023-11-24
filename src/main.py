@@ -4,11 +4,6 @@ from random import randint
 import playsound
 import threading
 
-monitor_info = GetMonitorInfo(MonitorFromPoint((0, 0)))
-work_area = monitor_info.get('Work')
-screen_width = work_area[2]
-work_height = work_area[3]
-
 running = True
 
 
@@ -31,8 +26,8 @@ class Ket:
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_3.png'),
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_4.png'),
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_5.png')]
-        self.x = int(screen_width * 0.8)
-        self.y = work_height - 64
+        self.x = 1400
+        self.y = 770
 
         self.i_frame = 0
         self.state = 1
