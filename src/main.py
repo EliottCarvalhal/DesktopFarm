@@ -1,11 +1,13 @@
 import tkinter as tk
-from win32api import GetMonitorInfo, MonitorFromPoint
 from random import randint
 import playsound
 import threading
+import pyautogui as PAG
+import time
 
+size = PAG.size()
 running = True
-
+delta_x_accumulated = 0
 
 class Ket:
     def click(self, event):
@@ -18,6 +20,7 @@ class Ket:
 
     def __init__(self):
         global running  # Declare running as a global variable
+        global delta_x_accumulated
         running = True
         self.window = tk.Tk()
 
@@ -26,8 +29,10 @@ class Ket:
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_3.png'),
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_4.png'),
                      tk.PhotoImage(file='../assets/pepe-running/pepe_r_5.png')]
-        self.x = 1400
-        self.y = 770
+
+        self.x = round(size.width /2)
+        self.y = round(size.height /2)
+        self.window.geometry('128x128+{}+{}'.format(self.x, self.y))
 
         self.i_frame = 0
         self.state = 1
@@ -39,15 +44,21 @@ class Ket:
         self.label = tk.Label(self.window, bd=0, bg='black')
         self.window.overrideredirect(True)
         self.window.attributes('-topmost', True)
-        self.window.wm_attributes('-transparentcolor', 'black')
+        self.window.wm_attributes('-transparent', True)
 
         self.window.bind("<Escape>", lambda event: self.stop(event))
         self.window.bind("<Button-1>", lambda event: self.click(event))
 
         self.label.pack()
+        
+        walktime = 1 # how long it takes to walk
+        dirAngle = 90 # 8 directions, 45deg angle per direction
+        distance = 10 # how long the walk is
+        self.move(walktime, dirAngle, distance)
 
         self.window.after(1, self.update)
         self.window.mainloop()
+        
 
     def event(self):
         if running:
@@ -58,7 +69,6 @@ class Ket:
             self.frame = self.idle[self.i_frame]
             self.i_frame = self.animate(self.idle)
 
-            self.window.geometry('128x128+' + str(self.x) + '+' + str(self.y))
             self.label.configure(image=self.frame)
             self.window.after(1, self.event)
 
@@ -68,6 +78,32 @@ class Ket:
         else:
             self.i_frame = 0
         return self.i_frame
+    
+    def move(self, walktime, dirAngle, deltaDistance):
+        global delta_x_accumulated
+        
+        delta_x = self.calculate_delta_x(walktime, dirAngle, deltaDistance)
+        delta_y = 0
+        delta_x_accumulated += delta_x
+             
+        x = round((size.width / 2) + delta_x_accumulated)
+        y = round((size.height / 2) + delta_y)
 
+        self.window.geometry('128x128+{}+{}'.format(x, y))
+                
+        self.window.after(100, self.move, walktime, dirAngle, deltaDistance)
+
+    def calculate_delta_x(self, walktime, dirAngle, deltaDistance):
+        current_time = time.time()
+        delta_x = deltaDistance * (
+            (walktime / 2)
+            * 0.1
+            * round(
+                10 * (1 if dirAngle < 180 else -1)
+                * (1 - abs(((dirAngle + 180) % 360) - 180) / 180)
+            )
+            * (current_time % 10)
+        )
+        return delta_x
 
 ket = Ket()
